@@ -1,5 +1,26 @@
 import {AudioLevel, VideoLevel} from '../Levels.mjs';
 
+// A manifest may repeat a representation id across adaptations (YouTube's AV1 sets
+// do), and the level list is rebuilt on every main loop tick. The duplicate is skipped
+// by design, so report each collision once at debug level instead of warning on every
+// rebuild.
+const reportedDuplicateLevelIds = new Set();
+
+/**
+ * Reports a level id claimed by two tracks, at most once per id.
+ * @param {string} source - Name of the level list being built.
+ * @param {string} levelId - The colliding level id.
+ * @param {Object} track - The track that was skipped.
+ * @param {Object} existingTrack - The track that already claimed the id.
+ */
+function reportDuplicateLevelId(source, levelId, track, existingTrack) {
+  if (reportedDuplicateLevelIds.has(levelId)) {
+    return;
+  }
+  reportedDuplicateLevelIds.add(levelId);
+  console.debug(`Duplicate level id found in ${source}:`, levelId, track, existingTrack);
+}
+
 export class DashTrackUtils {
   static getLevelFromRepresentation(rep) {
     const type = rep.adaptation.type;
@@ -26,7 +47,7 @@ export class DashTrackUtils {
         const levelId = 'video-' + data.id;
         const existing = map.get(levelId);
         if (existing) {
-          console.warn('Duplicate level id found in getVideoLevelList:', levelId, track, existing.track);
+          reportDuplicateLevelId('getVideoLevelList', levelId, track, existing.track);
           return;
         }
 
@@ -71,7 +92,7 @@ export class DashTrackUtils {
         const levelId = 'audio-' + data.id;
         const existing = map.get(levelId);
         if (existing) {
-          console.warn('Duplicate level id found in getAudioLevelList:', levelId, track, existing.track);
+          reportDuplicateLevelId('getAudioLevelList', levelId, track, existing.track);
           return;
         }
 

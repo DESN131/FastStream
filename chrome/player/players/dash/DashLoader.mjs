@@ -36,7 +36,9 @@ export function DASHLoaderFactory(player) {
         const level = DashTrackUtils.getLevelFromRepresentation(representation);
         const frag = player.client.getFragment(level, segmentIndex);
         if (!frag) {
-          console.warn('Fragment not found', requestObj, level, player.client.getFragments(level));
+          // Expected on the first requests of a stream: the fragment extractor has not
+          // registered the segment yet, and the request falls back to a direct fetch.
+          console.debug('Fragment not found', requestObj, level, player.client.getFragments(level));
           // throw new Error("Fragment not found");
           request(httpRequest, true, requestObj.startTime || 0, requestObj.type === 'InitializationSegment' || isNaN(segmentIndex));
           return;

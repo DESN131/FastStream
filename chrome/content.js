@@ -261,7 +261,6 @@
           const iframe = document.createElement('iframe');
           newURL.searchParams.set('parent_frame_id', request.frameId);
           iframe.src = newURL.href;
-          iframe.allowFullscreen = true;
           iframe.allow = 'autoplay; fullscreen; picture-in-picture';
           pauseAllWithin(document.body);
           // Remove everything from the document
@@ -274,7 +273,6 @@
         const softReplace = request.softReplace || Config.softReplaceByDefault;
         // copy styles
         const iframe = document.createElement('iframe');
-        iframe.allowFullscreen = true;
         iframe.allow = 'autoplay; fullscreen; picture-in-picture';
         iframe.style.display = 'none';
         newURL.searchParams.set('parent_frame_id', request.frameId);

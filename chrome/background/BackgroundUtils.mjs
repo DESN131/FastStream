@@ -1,8 +1,18 @@
 const PlayerURL = chrome.runtime.getURL('player/index.html');
+
+// Messages are sent to tabs, frames and content scripts that may not exist (yet) or may
+// already be gone, which Chrome reports as an error. That is expected and not actionable,
+// so only real messaging failures are worth a warning.
+const NO_RECEIVER_ERROR = /could not establish connection|receiving end does not exist/i;
+
 export class BackgroundUtils {
   static checkMessageError(message, suppress = false) {
-    if (chrome.runtime.lastError) {
-      if (!suppress) console.warn(`Unable to send message '${message}'`, chrome.runtime.lastError);
+    const error = chrome.runtime.lastError;
+    if (!error || NO_RECEIVER_ERROR.test(error.message || '')) {
+      return;
+    }
+    if (!suppress) {
+      console.warn(`Unable to send message '${message}'`, error);
     }
   }
 
